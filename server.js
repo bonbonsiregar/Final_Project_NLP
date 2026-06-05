@@ -229,7 +229,7 @@ app.post("/analyze-bulk", upload.single("file"), async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${port}`);
   if (!openRouterApiKey) {
     console.warn("OPENROUTER_API_KEY is not set. /analyze will fail until .env is populated and the server is restarted.");

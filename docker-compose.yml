@@ -1,0 +1,8 @@
+services:
+  api:
+    image: ${DOCKER_IMAGE:bgdv/final_project_nlp:latest}
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped

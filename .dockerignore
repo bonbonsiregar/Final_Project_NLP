@@ -1,0 +1,6 @@
+node_modules
+npm-debug.log
+.git
+.env
+dummy_tokopedia_15.csv
+tokopedia_product_reviews_2025.csv
