@@ -34,7 +34,7 @@ const upload = multer({
 const port = process.env.PORT || 3000;
 const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim();
 const defaultOpenRouterModel =
-    process.env.OPENROUTER_MODEL?.trim() || "google/gemini-3.1-flash-lite";
+    process.env.OPENROUTER_MODEL?.trim() || "openai/gpt-4o-mini";
 const allowedModels = (process.env.OPENROUTER_MODELS || defaultOpenRouterModel)
     .split(",")
     .map((model) => model.trim())
