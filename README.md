@@ -64,6 +64,18 @@ Verify it is up:
 curl http://localhost:3000/health
 ```
 
+### Health response
+
+```json
+{
+  "ok": true,
+  "default_model": "google/gemini-3.1-flash-lite",
+  "allowed_models": ["..."],
+  "has_api_key": true,
+  "langfuse_enabled": true
+}
+```
+
 ## Observability (Langfuse)
 
 LLM calls are traced with [Langfuse](https://langfuse.com). Set `LANGFUSE_PUBLIC_KEY`
@@ -90,4 +102,42 @@ Interactive docs: `GET /api-docs` (Swagger UI)
 | `POST` | `/scrape` | Scrape reviews from a Tokopedia product URL via the external scraper, then analyze each one (`url`, `total_reviews` 1–100, optional `model`) |
 
 Analysis responses include `predicted_sentiment`, `rating_sentiment`, `is_consistent`,
-`explanation`, and `confidence_percentage`.
+`explanation`, `confidence_percentage`, and `predicted_sentiment_confidence`.
+
+### `predicted_sentiment_confidence`
+
+A logprobs-derived confidence metric for the predicted sentiment. The server
+requests token-level log probabilities from OpenRouter; when the provider supports
+them (gemini models do), the field contains:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | `"predicted_sentiment_logprobs"` | Confidence estimation method |
+| `matched_text` | `string \| null` | The sentiment value whose tokens were tracked |
+| `score_percentage` | `integer \| null` (0–100) | `exp(average_logprob) * 100` — higher means more confident |
+| `average_logprob` | `number \| null` | Mean log-probability of the matched tokens |
+| `min_logprob` | `number \| null` | Minimum log-probability among the matched tokens |
+| `token_count` | `integer` | Number of tokens that contributed (0 when logprobs unavailable) |
+
+If the provider does not support logprobs, all nullable fields are `null` and
+`token_count` is `0` — the rest of the response is unaffected.
+
+### Example response
+
+```json
+{
+  "predicted_sentiment": "Sarcastic Negative",
+  "rating_sentiment": "Positive",
+  "is_consistent": false,
+  "explanation": "...",
+  "confidence_percentage": 92,
+  "predicted_sentiment_confidence": {
+    "method": "predicted_sentiment_logprobs",
+    "matched_text": "Sarcastic Negative",
+    "score_percentage": 87,
+    "average_logprob": -0.14,
+    "min_logprob": -0.31,
+    "token_count": 3
+  }
+}
+```
