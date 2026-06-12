@@ -43,6 +43,9 @@ export const predictedSentimentConfidenceSchema = z.object({
     score_percentage: z.number().int().min(0).max(100).nullable(),
     average_logprob: z.number().nullable(),
     min_logprob: z.number().nullable(),
+    standard_deviation: z.number().nullable(),
+    variance: z.number().nullable(),
+    median_logprob: z.number().nullable(),
     token_count: z.number().int().min(0),
 });
 

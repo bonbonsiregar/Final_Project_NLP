@@ -81,6 +81,9 @@ function buildEmptyPredictedSentimentConfidence() {
         score_percentage: null,
         average_logprob: null,
         min_logprob: null,
+        standard_deviation: null,
+        variance: null,
+        median_logprob: null,
         token_count: 0,
     };
 }
@@ -142,23 +145,37 @@ function summarizePredictedSentimentConfidence(
         return { ...emptySummary, matched_text: matchedText };
     }
 
+    const logprobs = matchedTokens.map((token) => token.logprob);
     const averageLogprob =
-        matchedTokens.reduce((sum, token) => sum + token.logprob, 0) /
-        matchedTokens.length;
-    const minLogprob = Math.min(
-        ...matchedTokens.map((token) => token.logprob),
-    );
+        logprobs.reduce((sum, logprob) => sum + logprob, 0) / logprobs.length;
+    const minLogprob = Math.min(...logprobs);
     const scorePercentage = Math.max(
         0,
         Math.min(100, Math.round(Math.exp(averageLogprob) * 100)),
     );
+    const variance =
+        logprobs.reduce(
+            (sum, logprob) => sum + Math.pow(logprob - averageLogprob, 2),
+            0,
+        ) / logprobs.length;
+    const standardDeviation = Math.sqrt(variance);
+    const sortedLogprobs = [...logprobs].sort((a, b) => a - b);
+    const middleIndex = Math.floor(sortedLogprobs.length / 2);
+    const medianLogprob =
+        sortedLogprobs.length % 2 === 0
+            ? (sortedLogprobs[middleIndex - 1] + sortedLogprobs[middleIndex]) / 2
+            : sortedLogprobs[middleIndex];
 
     return {
         method: "predicted_sentiment_logprobs",
-        matched_text: matchedText === predictedSentiment ? matchedText : predictedSentiment,
+        matched_text:
+            matchedText === predictedSentiment ? matchedText : predictedSentiment,
         score_percentage: scorePercentage,
         average_logprob: averageLogprob,
         min_logprob: minLogprob,
+        standard_deviation: standardDeviation,
+        variance,
+        median_logprob: medianLogprob,
         token_count: matchedTokens.length,
     };
 }

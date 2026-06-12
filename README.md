@@ -1,6 +1,6 @@
 # Final_Project_NLP
 
-Tokopedia review-rating consistency detector. Uses OpenRouter LLMs to compare review text
+Marketplace review-rating consistency detector. Uses OpenRouter LLMs to compare review text
 against star ratings and flag inconsistencies.
 
 ## Prerequisites
@@ -17,9 +17,9 @@ Create a `.env` file in the project root with at least:
 
 ```env
 OPENROUTER_API_KEY=your-openrouter-key
-OPENROUTER_MODEL=google/gemini-3.1-flash-lite
+OPENROUTER_MODEL=openai/gpt-oss-120b
 OPENROUTER_SITE_URL=http://localhost:3000
-OPENROUTER_APP_NAME=Tokopedia Review Consistency Detector
+OPENROUTER_APP_NAME=Marketplace Review Consistency Detector
 PORT=3000
 ```
 
@@ -34,17 +34,16 @@ Optional variables:
 | `LANGFUSE_SECRET_KEY` | Langfuse secret key |
 | `LANGFUSE_BASE_URL` | Langfuse region or self-hosted URL (e.g. `https://us.cloud.langfuse.com`) |
 
-Restart the server after changing `.env`.
 
 ## Run
 
-**Local development** (auto-restarts on file changes):
+**Local development**:
 
 ```bash
 npm run dev
 ```
 
-**Production-style** (no file watching):
+**Production**:
 
 ```bash
 npm start
@@ -69,7 +68,7 @@ curl http://localhost:3000/health
 ```json
 {
   "ok": true,
-  "default_model": "google/gemini-3.1-flash-lite",
+  "default_model": "openai/gpt-oss-120b",
   "allowed_models": ["..."],
   "has_api_key": true,
   "langfuse_enabled": true
@@ -115,8 +114,11 @@ them (gemini models do), the field contains:
 | `method` | `"predicted_sentiment_logprobs"` | Confidence estimation method |
 | `matched_text` | `string \| null` | The sentiment value whose tokens were tracked |
 | `score_percentage` | `integer \| null` (0–100) | `exp(average_logprob) * 100` — higher means more confident |
-| `average_logprob` | `number \| null` | Mean log-probability of the matched tokens |
+| `average_logprob` | `number \| null` | Arithmetic mean log-probability of the matched tokens |
 | `min_logprob` | `number \| null` | Minimum log-probability among the matched tokens |
+| `standard_deviation` | `number \| null` | Population standard deviation of the matched token log-probabilities |
+| `variance` | `number \| null` | Population variance of the matched token log-probabilities |
+| `median_logprob` | `number \| null` | Median log-probability of the matched tokens |
 | `token_count` | `integer` | Number of tokens that contributed (0 when logprobs unavailable) |
 
 If the provider does not support logprobs, all nullable fields are `null` and
@@ -137,6 +139,9 @@ If the provider does not support logprobs, all nullable fields are `null` and
     "score_percentage": 87,
     "average_logprob": -0.14,
     "min_logprob": -0.31,
+    "standard_deviation": 0.07,
+    "variance": 0.0049,
+    "median_logprob": -0.12,
     "token_count": 3
   }
 }
